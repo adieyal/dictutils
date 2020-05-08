@@ -1,4 +1,7 @@
 .env
 .pytest_cache
 __pycache__
-\.*.swp
+\.*.sw[op]
+dist
+dictutils.egg-info/
+build/
