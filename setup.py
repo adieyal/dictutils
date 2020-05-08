@@ -1,10 +1,15 @@
 from distutils.core import setup
+
+with open("README.md") as fp:
+    long_description = fp.read()
+
 setup(
   name = "dictutils",
   packages = ["dictutils"],
   version = "0.1",
   license="MIT",
   description = "A collection of useful tools for manipulating dictionaries.",
+  long_description=long_description,
   author = "Adi Eyal",
   author_email = "adi@openup.org.za",
   url = "https://github.com/adieyal/dictutils",
