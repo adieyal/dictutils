@@ -1,4 +1,12 @@
-def mergedict(a, b, path=None, update=True):
+def mergedict(*args, path=None, update=True):
+    head, *tail = args
+
+    for d in tail:
+        head = _mergedict(head, d, path, update)  
+
+    return head
+    
+def _mergedict(a, b, path=None, update=True):
     """
     Derived from: http://stackoverflow.com/questions/7204805/python-dictionaries-of-dictionaries-merge
     merges b into a
@@ -26,7 +34,7 @@ def mergedict(a, b, path=None, update=True):
     for key in b:
         if key in a:
             if isinstance(a[key], dict) and isinstance(b[key], dict):
-                mergedict(a[key], b[key], path + [str(key)])
+                _mergedict(a[key], b[key], path + [str(key)])
             elif a[key] == b[key]:
                 pass # same leaf value
             elif isinstance(a[key], list) and isinstance(b[key], list):

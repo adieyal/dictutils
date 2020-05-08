@@ -26,6 +26,10 @@ def test_one_empty_dict():
     assert mergedict({1: 2}, {}) == {1: 2}
     assert mergedict({}, {1: 2}) == {1: 2}
 
+def test_one_argument():
+    d = {1:2, 3:4}
+    assert mergedict(d) == d
+
 def test_simple_merge():
     a = {1: 2}
     b = {3: 4}
@@ -79,4 +83,14 @@ def test_concatenate_arrays():
 
     assert mergedict(a, b) == {
         1: [1, 2, 3, 4]
+    }
+
+def test_merge_multiple():
+    a = {1: [1, 2]}
+    b = {1: [3, 4]}
+    c = {2: [3, 4]}
+
+    assert mergedict(a, b, c) == {
+        1: [1, 2, 3, 4],
+        2: [3, 4]
     }
