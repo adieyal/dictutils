@@ -8,7 +8,7 @@ setup(
   author = "Adi Eyal",
   author_email = "adi@openup.org.za",
   url = "https://github.com/adieyal/dictutils",
-  download_url = "https://github.com/adieyal/dictutils/archive/v_01.tar.gz",
+  download_url = "https://github.com/adieyal/dictutils/archive/v0.1.tar.gz",
   keywords = ["dictionary", "utility"],
   install_requires = [],
   classifiers=[
