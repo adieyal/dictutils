@@ -213,7 +213,7 @@ This can be repeated an arbitary number of times to create a complicated data st
 
 ## dictutils.pivot
 
-Pivots a dictionary by a give list of keys
+Pivots a dictionary by a given list of keys
 
 ```python
 d1 = {
