@@ -1,3 +1,5 @@
+from collections.abc import Mapping
+
 def flatten_dict(d):
     """
     Flatten a dictionary into an array of arrays e.g:
@@ -24,7 +26,7 @@ def flatten_dict(d):
     used as a component of the pivot function
     
     """
-    if type(d) != dict:
+    if not isinstance(d, Mapping):
         return [[d]]
 
     arr = []
