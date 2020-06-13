@@ -1,6 +1,8 @@
+from collections import defaultdict
 from collections.abc import Mapping
+from typing import Mapping, List, Iterable, Dict, Optional
 
-def flatten_dict(d):
+def flatten_dict(d:Mapping) -> list:
     """
     Flatten a dictionary into an array of arrays e.g:
 
@@ -36,7 +38,7 @@ def flatten_dict(d):
 
     return arr
 
-def rearrange(in_arrs, order):
+def rearrange(in_arrs: List[List], order: List[int]) -> List[List]:
     """
     rearrange elements in a given list of arrays. The last element always remains in place
 
@@ -65,7 +67,7 @@ def rearrange(in_arrs, order):
 
     return out_arrs
 
-def nest(arrays, root=None):
+def nest(arrays:list, root:Optional[Dict]=None) -> Dict:
     """
     Unflatten a dictionary. Similar to qsdict but is simpler and works on arrays
     """
@@ -83,7 +85,7 @@ def nest(arrays, root=None):
                 d[head] = nest([tail], d[head])
     return d
         
-def pivot(d, order):
+def pivot(d: Dict, order: List[int]) -> Dict:
     """
     Pivots an array by a list of keys
 

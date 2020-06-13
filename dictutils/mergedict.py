@@ -1,3 +1,5 @@
+from typing import Mapping, Dict, Optional, Iterable
+
 def mergedict(*args, path=None, update=True):
     head, *tail = args
 
@@ -6,7 +8,7 @@ def mergedict(*args, path=None, update=True):
 
     return head
     
-def _mergedict(a, b, path=None, update=True):
+def _mergedict(a: Dict, b: Dict, path=None, update: bool=True) -> Optional[Dict]:
     """
     Derived from: http://stackoverflow.com/questions/7204805/python-dictionaries-of-dictionaries-merge
     merges b into a
