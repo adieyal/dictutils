@@ -5,7 +5,7 @@ with open("README.md", encoding='utf-8') as fp:
 
 setup(
     name = "dictutils",
-    version = "0.1.5",
+    version = "0.1.6",
     license="MIT",
     description = "A collection of useful tools for manipulating dictionaries.",
     long_description=long_description,
@@ -13,7 +13,7 @@ setup(
     author = "Adi Eyal",
     author_email = "adi@openup.org.za",
     url = "https://github.com/adieyal/dictutils",
-    download_url = "https://github.com/adieyal/dictutils/archive/0.1.5.tar.gz",
+    download_url = "https://github.com/adieyal/dictutils/archive/0.1.6.tar.gz",
     packages=find_packages(),
     keywords = ["dictionary", "utility"],
     #install_requires = [],
