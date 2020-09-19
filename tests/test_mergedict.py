@@ -1,3 +1,5 @@
+from collections import defaultdict, OrderedDict
+
 import pytest
 
 from dictutils.mergedict import mergedict
@@ -21,6 +23,11 @@ def test_merge_non_dict():
 
 def test_two_empty_dicts():
     assert mergedict({}, {}) == {}
+
+def test_accepts_other_dicts():
+    assert mergedict(defaultdict(), defaultdict()) == {}
+    assert mergedict(OrderedDict(), OrderedDict()) == {}
+
 
 def test_one_empty_dict():
     assert mergedict({1: 2}, {}) == {1: 2}

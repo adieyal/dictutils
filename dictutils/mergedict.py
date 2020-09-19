@@ -16,7 +16,7 @@ def _mergedict(a: Dict, b: Dict, path=None, update: bool=True) -> Optional[Dict]
         concatenate_arrays - if True then arrays are concatenate, otherwise they are recursively traversed 
         update - if True then values in b clobber values in a
     """
-    if type(a) != dict or type(b) != dict:
+    if not isinstance(a, Mapping) or not isinstance(b, Mapping):
         raise TypeError("Both a an b arguments must be dicts")
 
     if a == None and b == None:
