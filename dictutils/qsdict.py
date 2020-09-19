@@ -1,7 +1,7 @@
 from collections import OrderedDict
 from typing import Mapping, Iterable, Dict 
 
-def qsdict(qs: Iterable[Mapping], *args: Any) -> Dict:
+def qsdict(qs: Iterable[Mapping], *args) -> Dict:
     """
     Convert a query string to a nested dict
     :param qs: The query string from which the array will be created. qs can also be an object and args are all attributes on that object.
