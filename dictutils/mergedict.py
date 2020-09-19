@@ -26,12 +26,6 @@ def _mergedict(a: Dict, b: Dict, path=None, update: bool=True) -> Optional[Dict]
     elif b == None:
         return a
 
-    if len(b) == 0:
-        return a
-    elif len(a) == 0:
-        return b
-
-
     if path is None: path = []
     for key in b:
         if key in a:
