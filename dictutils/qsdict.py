@@ -1,7 +1,7 @@
 from collections import OrderedDict
-from typing import Mapping, Iterable, Dict, Tuple
+from typing import Mapping, Iterable, Dict 
 
-def qsdict(qs: Iterable[Mapping], *args) -> Dict:
+def qsdict(qs: Iterable[Mapping], *args: Any) -> Dict:
     """
     Convert a query string to a nested dict
     :param qs: The query string from which the array will be created. qs can also be an object and args are all attributes on that object.
@@ -47,7 +47,7 @@ def qsdict(qs: Iterable[Mapping], *args) -> Dict:
                 current_dict[value] = OrderedDict()
             nested_dicts.append(current_dict[value])
         current_dict = nested_dicts[-1]
-        if isinstance(args[-1], Tuple):
+        if isinstance(args[-1], tuple):
             current_dict[v(q, args[-2])] = [v(q, el) for el in args[-1]]
         else:
             current_dict[v(q, args[-2])] = v(q, args[-1])
