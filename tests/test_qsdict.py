@@ -1,4 +1,5 @@
 import pytest
+from collections import namedtuple, OrderedDict
 
 from dictutils.qsdict import qsdict
 
@@ -110,6 +111,31 @@ def test_callable():
         4 : {
             2: 6
         }
+    }
+    
+def test_tuple():
+    d = [
+        {"a": 1, "b": 2, "c": 3, "d": 4},
+        {"a": 1, "b": 4, "c": 6, "d": 8},
+    ]
+
+    d1 = qsdict(d, "a", "b", ("c", "d"))
+
+    assert d1 == {
+        1 : OrderedDict({
+            2: [3, 4],
+            4: [6, 8]
+        })
+    }
+
+    T = namedtuple('T', ['x', 'y'])
+    d2 = qsdict(d, "a", "b", T("c", "d"))
+
+    assert d1 == {
+        1 : OrderedDict({
+            2: [3, 4],
+            4: [6, 8]
+        })
     }
 
 def test_object_properties():

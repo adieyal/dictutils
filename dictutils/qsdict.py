@@ -1,5 +1,5 @@
 from collections import OrderedDict
-from typing import Mapping, Iterable, Dict
+from typing import Mapping, Iterable, Dict, Tuple
 
 def qsdict(qs: Iterable[Mapping], *args) -> Dict:
     """
@@ -47,7 +47,7 @@ def qsdict(qs: Iterable[Mapping], *args) -> Dict:
                 current_dict[value] = OrderedDict()
             nested_dicts.append(current_dict[value])
         current_dict = nested_dicts[-1]
-        if type(args[-1]) == tuple:
+        if isinstance(args[-1], Tuple):
             current_dict[v(q, args[-2])] = [v(q, el) for el in args[-1]]
         else:
             current_dict[v(q, args[-2])] = v(q, args[-1])
