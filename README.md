@@ -1,8 +1,8 @@
 # dictutils
 
-[![Build Status](https://travis-ci.org/adieyal/dictutils.svg?branch=master)](https://travis-ci.org/adieyal/dictutils)
-
 A collection of useful tools for manipulating dictionaries.
+
+```pip install dictutils```
 
 ## dictutils.qsdict
 
