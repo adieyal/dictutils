@@ -3,7 +3,7 @@ bleach==3.1.5
 certifi==2023.7.22
 chardet==3.0.4
 docutils==0.16
-idna==2.9
+idna==3.7
 importlib-metadata==1.6.0
 keyring==21.2.1
 more-itertools==8.2.0
