@@ -60,6 +60,22 @@ html_theme = "furo"
 html_static_path = ["_static"]
 templates_path = ["_templates"]
 
+# HTML theme options (Furo theme)
+html_theme_options = {
+    "source_repository": "https://github.com/adieyal/dictutils/",
+    "source_branch": "master",
+    "source_directory": "docs/",
+}
+
+# Add GitHub links to the navigation
+html_context = {
+    "display_github": True,
+    "github_user": "adieyal",
+    "github_repo": "dictutils",
+    "github_version": "master",
+    "conf_py_path": "/docs/",
+}
+
 # Keep warnings loud on RTD
 nitpicky = False
 

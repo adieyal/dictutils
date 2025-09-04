@@ -1,5 +1,11 @@
 # Cookbook: Common Tasks
 
+This page contains real-world examples and patterns for using dictutils in your projects.
+
+:::{tip}
+💡 **Found a bug or have suggestions?** [Open an issue](https://github.com/adieyal/dictutils/issues) on GitHub!
+:::
+
 ## Data Analysis
 
 ### Build nested dict from query results (qsdict)

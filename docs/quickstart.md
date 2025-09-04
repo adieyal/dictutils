@@ -2,6 +2,10 @@
 
 Welcome to **dictutils**! This library provides small, dependency-free utilities for working with nested dictionaries and objects. The emphasis is on **examples you can copy and paste**.
 
+:::{note}
+👨‍💻 **Contributing?** Check out the [GitHub repository](https://github.com/adieyal/dictutils) for development setup and contribution guidelines.
+:::
+
 ## Installation
 
 ```bash

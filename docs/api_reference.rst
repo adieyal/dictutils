@@ -3,6 +3,9 @@ API Reference
 
 This section contains the complete API documentation generated from docstrings.
 
+.. note::
+   📝 **Docstrings missing or unclear?** Help us improve by `contributing documentation <https://github.com/adieyal/dictutils/issues>`_!
+
 Core
 ----
 

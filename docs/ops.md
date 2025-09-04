@@ -1,5 +1,11 @@
 # Advanced Operations (`dictutils.ops`)
 
+The ops module provides 20+ advanced utilities for dictionary manipulation, path operations, and data transformation.
+
+:::{seealso}
+📚 **Want to contribute new operations?** Check the [contribution guide](https://github.com/adieyal/dictutils/blob/master/README.md#contributing) on GitHub.
+:::
+
 ## Path operations
 
 ```python
