@@ -73,7 +73,7 @@ def _parse_path(path: Path) -> list[str | int]:
 
     s = str(path)
     out: list[str | int] = []
-    buf = []
+    buf: list[str] = []
     i = 0
     while i < len(s):
         ch = s[i]
@@ -126,7 +126,7 @@ def _ensure_container(
             return parent[key]
         # auto-create list if mapping slot is missing
         if _is_mapping(parent):
-            lst = []
+            lst: list[Any] = []
             parent[str(key)] = lst  # store under stringified index to avoid collisions
             while len(lst) <= key:
                 lst.append(None)
@@ -565,19 +565,22 @@ def deep_diff(a: Any, b: Any) -> tuple[Any, Any, Any, Any]:
     if isinstance(a, list) and isinstance(b, list):
         # simple list diff (by position)
         maxlen = max(len(a), len(b))
-        added, removed, changed, same = [], [], [], []
+        added_list: list[Any] = []
+        removed_list: list[Any] = []
+        changed_list: list[dict[str, Any]] = []
+        same_list: list[Any] = []
         for i in range(maxlen):
             if i >= len(a):
-                added.append(b[i])
+                added_list.append(b[i])
                 continue
             if i >= len(b):
-                removed.append(a[i])
+                removed_list.append(a[i])
                 continue
             if a[i] == b[i]:
-                same.append(a[i])
+                same_list.append(a[i])
             else:
-                changed.append({"from": a[i], "to": b[i]})
-        return (added, removed, changed, same)
+                changed_list.append({"from": a[i], "to": b[i]})
+        return (added_list, removed_list, changed_list, same_list)
 
     # scalars
     if a == b:
@@ -629,36 +632,56 @@ def flatten_paths(d: Any, prefix: str = "", sep: str = ".") -> dict[str, Any]:
     return out
 
 
-def expand_paths(flat: Mapping[str, Any]) -> dict[str, Any]:
+def expand_paths(path: str | Sequence[str | int]) -> list[str | int]:
     """
-    Expand dot-notation paths back into nested structure.
+    Parse dotted path string into list of keys.
 
     Args:
-        flat: Dictionary with dot-notation paths as keys
+        path: Dotted path string or sequence
 
     Returns:
-        Nested dictionary structure
+        List of path components
 
-    Example:
-        >>> import json
-        >>> flat_data = {"user.profile.name": "Alice", "user.profile.tags[0]": "admin"}
-        >>> result = expand_paths(flat_data)
-        >>> print(json.dumps(result, indent=4))
-        {
-            "user": {
-                "profile": {
-                    "name": "Alice",
-                    "tags": [
-                        "admin"
-                    ]
-                }
-            }
-        }
+    Examples:
+        >>> expand_paths("a.b.c")
+        ['a', 'b', 'c']
+        >>> expand_paths("users.0.name")
+        ['users', 0, 'name']
     """
-    root: dict[str, Any] = {}
-    for p, v in flat.items():
-        deep_set(root, p, v)
-    return root
+    if isinstance(path, (list, tuple)):
+        return list(path)
+
+    s = str(path)
+    out: list[str | int] = []
+    buf: list[str] = []
+    i = 0
+    while i < len(s):
+        ch = s[i]
+        if ch == ".":
+            if buf:
+                tok = "".join(buf)
+                out.append(int(tok) if _is_int(tok) else tok)
+                buf = []
+            i += 1
+        elif ch == "[":
+            # flush current
+            if buf:
+                tok = "".join(buf)
+                out.append(int(tok) if _is_int(tok) else tok)
+                buf = []
+            j = s.find("]", i + 1)
+            if j == -1:
+                raise ValueError(f"Unmatched '[' in path: {s}")
+            idx = s[i + 1 : j]
+            out.append(int(idx) if _is_int(idx) else idx)
+            i = j + 1
+        else:
+            buf.append(ch)
+            i += 1
+    if buf:
+        tok = "".join(buf)
+        out.append(int(tok) if _is_int(tok) else tok)
+    return out
 
 
 def project(d: Any, paths: Iterable[Path]) -> dict[str, Any]:
@@ -1424,9 +1447,11 @@ def patch(d: Any, ops: Sequence[Mapping[str, Any]]) -> Any:
         operation = op.get("op")
         path = op.get("path")
         if operation in ("add", "replace"):
-            deep_set(d, path, op.get("value"))
+            if path is not None:
+                deep_set(d, path, op.get("value"))
         elif operation == "remove":
-            deep_del(d, path)
+            if path is not None:
+                deep_del(d, path)
         else:
             raise ValueError(f"Unsupported op: {operation}")
     return d

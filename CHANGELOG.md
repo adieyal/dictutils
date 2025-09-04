@@ -5,6 +5,43 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.1] - 2025-09-04
+
+### Added
+- **Enhanced README.md**: Comprehensive examples with real-world use cases
+  - Added Quick Examples section showcasing all major features
+  - Added Real-World Examples (sales analysis, configuration management) 
+  - Expanded dictutils.ops module documentation with detailed code samples
+  - Added status badges for documentation and CI
+  - Complete documentation links to Read the Docs pages
+- **Documentation improvements**: Complete GitHub repository integration
+  - Added GitHub links throughout all documentation pages
+  - Configured Sphinx with GitHub source navigation
+  - Added contribution callouts and issue reporting guidance
+  - Enhanced navigation with external links (GitHub, PyPI, Issues)
+- **Comprehensive CHANGELOG.md**: Complete project history documentation
+  - Detailed migration guide from 0.1.x to 1.0.0
+  - Full historical release notes with context
+  - Security updates timeline and dependency management
+
+### Changed
+- **Documentation theme**: Switched from Furo to Alabaster
+  - Clean, minimal design optimized for technical documentation
+  - Improved GitHub integration with star button and banner
+  - Custom navigation links to PyPI, Issues, and Changelog
+  - Responsive layout with fixed sidebar navigation
+- **Project metadata**: Enhanced pyproject.toml with complete URL links
+  - Added Documentation, Issues, and Changelog URLs
+  - Improved discoverability and project navigation
+
+### Technical
+- **Documentation build system**: Improved reliability and performance
+  - Fixed Sphinx configuration for better GitHub integration
+  - Optimized theme configuration for faster loading
+  - Enhanced development workflow with better error handling
+
+---
+
 ## [1.0.0] - 2025-09-04
 
 ### Major Release - Breaking Changes
