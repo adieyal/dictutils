@@ -26,6 +26,9 @@ classifiers = [
 [project.urls]
 Homepage = "https://github.com/adieyal/dictutils"
 Repository = "https://github.com/adieyal/dictutils"
+Documentation = "https://dictutils.readthedocs.io/en/latest/"
+Issues = "https://github.com/adieyal/dictutils/issues"
+Changelog = "https://github.com/adieyal/dictutils/blob/master/CHANGELOG.md"
 
 [project.optional-dependencies]
 test = ["pytest>=8.0.0"]
