@@ -56,24 +56,29 @@ intersphinx_mapping = {
 }
 
 # HTML theme
-html_theme = "furo"
+html_theme = "alabaster"
 html_static_path = ["_static"]
 templates_path = ["_templates"]
 
-# HTML theme options (Furo theme)
+# Alabaster theme options
 html_theme_options = {
-    "source_repository": "https://github.com/adieyal/dictutils/",
-    "source_branch": "master",
-    "source_directory": "docs/",
-}
-
-# Add GitHub links to the navigation
-html_context = {
-    "display_github": True,
     "github_user": "adieyal",
     "github_repo": "dictutils",
-    "github_version": "master",
-    "conf_py_path": "/docs/",
+    "github_button": True,
+    "github_banner": True,
+    "github_type": "star",
+    "show_powered_by": False,
+    "show_related": False,
+    "note_bg": "#FFF59C",
+    "page_width": "1024px",
+    "sidebar_width": "300px",
+    "fixed_sidebar": True,
+    "description": "Small, dependency-free utilities for nested dictionaries",
+    "extra_nav_links": {
+        "📦 PyPI Package": "https://pypi.org/project/dictutils/",
+        "🐛 Issue Tracker": "https://github.com/adieyal/dictutils/issues",
+        "📖 Changelog": "https://github.com/adieyal/dictutils/blob/master/CHANGELOG.md",
+    }
 }
 
 # Keep warnings loud on RTD
