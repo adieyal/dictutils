@@ -1,281 +1,135 @@
 # dictutils
 
-A collection of useful tools for manipulating dictionaries.
+## Requirements
+- Python 3.9+
 
-```pip install dictutils```
+## Installation
 
-## dictutils.qsdict
+Install from PyPI (recommended):
 
-Takes a list of dicts or objects and convert it into nested dicts.
+```bash
+pip install dictutils
+```
+
+Or from source (using PEP 517/518):
+
+```bash
+pip install .
+# For contributors (editable install):
+pip install -e .[test,typecheck,lint]
+```
+
+## API
+
+### `dictutils.qsdict`
 
 ```python
+def qsdict(qs: Iterable[Union[Mapping, object]], *args, strict: bool = False) -> dict:
+    """Build a nested dict from rows (dicts or objects) by a sequence of selectors."""
+```
+
+#### Example
+```python
+from dictutils import qsdict
 lst = [
     {"shape": "circle", "colour": "blue", "count": 5},
-    {"shape": "circle", "colour": "pink", "count":15},
+    {"shape": "circle", "colour": "pink", "count": 15},
     {"shape": "square", "colour": "yellow", "count": 29},
-    {"shape": "square", "colour": "blue", "count": 10}
+    {"shape": "square", "colour": "blue", "count": 10},
 ]
+result = qsdict(lst, "shape", "colour", "count")
+# {'circle': {'blue': 5, 'pink': 15}, 'square': {'yellow': 29, 'blue': 10}}
 
-qsdict(lst, "shape", "colour", "count")
-
-# returns
-
-{
-    "circle": {
-        "blue": 5,
-        "pink": 15
-    },
-    "square": {
-        "yellow": 29,
-        "blue": 10
-    }
-}
-
-qsdict(lst, "colour", "shape", "count")
-
-# returns
-
-{
-    "blue": {
-        "circle": 5,
-        "square": 10
-    },
-    "pink": {
-        "circle": 15
-    },
-    "yellow": {
-        "square": 29
-    }
-}
+# Strict mode raises on missing keys/attributes
+qsdict([{"a": 1}], "a", "missing", strict=True)  # KeyError
 ```
 
-Can also accept callables
+### `dictutils.mergedict`
 
 ```python
-
-qsdict(lst, lambda x: x["colour"][0:2], "shape", "count")
-
-{
-    "bl": {
-        "circle": 5,
-        "square": 10
-    },
-    "pi": {
-        "circle": 15
-    },
-    "ye": {
-        "square": 29
-    }
-}
+def mergedict(*args, path=None, update=True) -> dict:
+    """Merge multiple nested dicts. The first dict is updated in-place."""
 ```
 
-Access an arbitary number of arguments
+#### Example
+```python
+from dictutils import mergedict
+d1 = {"a": {"b": 1}}
+d2 = {"a": {"c": 2}}
+merged = mergedict(d1, d2)
+# d1 is now {"a": {"b": 1, "c": 2}}
+```
+
+### `dictutils.pivot`
 
 ```python
-lst = [
-    {"shape": "circle", "colour": "blue", "country": "France", "count": 5},
-    {"shape": "circle", "colour": "pink", "country": "Germany", "count":15},
-    {"shape": "square", "colour": "yellow", "country": "France", "count": 29},
-    {"shape": "square", "colour": "blue", "country": "China", "count": 10}
+def pivot(d: dict, order: list[int]) -> dict:
+    """Pivot a nested dict by a list of key indices."""
+```
+
+#### Example
+```python
+from dictutils import pivot
+d = {"A": {"X": 1, "Y": 2}, "B": {"X": 3, "Y": 4}}
+result = pivot(d, [1, 0])
+# {'X': {'A': 1, 'B': 3}, 'Y': {'A': 2, 'B': 4}}
+```
+
+### `dictutils.nestagg`
+
+```python
+from typing import Any, Callable
+from dataclasses import dataclass
+
+def nest_agg(
+    items: list[Any],
+    keys: list[str | Callable[[Any], Any]],
+    *,
+    aggs: dict[str, 'Agg'],
+    include_rows: bool = False,
+    rows_key: str = "rows",
+) -> dict:
+    """Group and aggregate items by keys, with flexible aggregation at leaves."""
+
+@dataclass(frozen=True)
+class Agg:
+    map: Callable[[Any], Any]
+    zero: Any | Callable[[], Any] | None = None
+    reduce: Callable[[Any, Any], Any] = operator.add
+    skip_none: bool = True
+```
+
+#### Example
+```python
+from dictutils import nest_agg, Agg
+items = [
+    {"cat": "A", "val": 1},
+    {"cat": "A", "val": 2},
+    {"cat": "B", "val": 3},
 ]
-
-qsdict(lst, lambda x: x["colour"][0:2], "shape", "country","count")
-
-# Returns
-{
-    "bl": {
-        "circle": {
-            "France": 5
-        },
-        "square": {
-            "China": 10
-        }
-    },
-    "pi": {
-        "circle": {
-            "Germany": 15
-        }
-    },
-    "ye": {
-        "square": {
-            "France": 29
-        }
-    }
-}
+aggs = {"total": Agg(map=lambda it: it["val"], zero=0)}
+tree = nest_agg(items, keys=["cat"], aggs=aggs, include_rows=True)
+# {'A': {'total': 3, 'rows': [...]}, 'B': {'total': 3, 'rows': [...]}}
 ```
 
-Pass a tuple as the last argument if you prefer the leaf node to be a list
+## Development
 
-```python
-qsdict(lst, lambda x: x["colour"][0:2], "shape", ("country","count"))
+- Install dev tools: `pip install .[test,typecheck]`
+- Run tests: `pytest`
+- Type check: `mypy dictutils`
+- Lint: `ruff dictutils`
+- Format: `black dictutils`
+- Upgrade syntax: `pyupgrade --py39-plus <file.py>`
+- Pre-commit: `pre-commit install` (then `git commit` auto-runs checks)
 
-{
-    "bl": {
-        "circle": [
-            "France",
-            5
-        ],
-        "square": [
-            "China",
-            10
-        ]
-    },
-    "pi": {
-        "circle": [
-            "Germany",
-            15
-        ]
-    },
-    "ye": {
-        "square": [
-            "France",
-            29
-        ]
-    }
-}
-```
+## Continuous Integration
 
-## dictutils.mergedict
+- See `.github/workflows/ci.yml` for GitHub Actions workflow (pytest, mypy, ruff).
 
-Merges two nested dictionaries. Note that the first dictionary is updated.
+## Migration Note
 
-```python
-d1 = {
-    "blue": {
-        "circle": {
-            "France": 5
-        },
-        "square": {
-            "China": 10
-        }
-    },
-    "pink": {
-        "circle": {
-            "Germany": 15
-        }
-    },
-    "yellow": {
-        "square": {
-            "France": 29
-        }
-    }
-}
+This project uses [PEP 621](https://www.python.org/dev/peps/pep-0621/) and [pyproject.toml](https://packaging.python.org/en/latest/specifications/pyproject-toml/) for all build and packaging configuration. Legacy `setup.py`/`setup.cfg` are no longer used.
 
-d2 = {
-    "blue": {
-        "brightness": 4,
-    },
-    "pink": {
-        "brightness": 4,
-    },
-    "yellow": {
-        "brightness": 4,
-    }
-}
+## License
 
-mergedict(d1, d2)
-
-print(d1)
-
-{
-    "blue": {
-        "circle": {
-            "France": 5
-        },
-        "square": {
-            "China": 10
-        },
-        "brightness": 4
-    },
-    "pink": {
-        "circle": {
-            "Germany": 15
-        },
-        "brightness": 4
-    },
-    "yellow": {
-        "square": {
-            "France": 29
-        },
-        "brightness": 4
-    }
-}
-```
-
-If you don't want to clobber the first dictionary, provide an empty dictionary
-```
-d0 = {}
-mergedict(d0, d1)
-mergedict(d0, d2)
-```
-
-This can be repeated an arbitary number of times to create a complicated data structure while avoiding nested loops and unwieldy code. This code is courtsey of this Stack Overflow [thread](https://stackoverflow.com/questions/7204805/how-to-merge-dictionaries-of-dictionaries).
-
-## dictutils.pivot
-
-Pivots a dictionary by a given list of keys
-
-```python
-d1 = {
-    "A": {
-        "Category1": {
-            "X": 111111,
-            "Y": 222222,
-        },
-        "Category2": {
-            "X": 333333,
-            "Y": 444444,
-        },
-        "Category3": {
-            "X": 555555,
-            "Y": 666666,
-        }
-    },
-    "B": {
-        "Category1": {
-            "X": 777777,
-            "Y": 888888,
-        },
-        "Category2": {
-            "X": 999999,
-            "Y": 101010,
-        },
-        "Category3": {
-            "X": 101011,
-            "Y": 101012,
-        }
-    },
-}
-
-print(pivot(d, [2, 1, 0])
-
-{
-    "X": {
-        "Category1": {
-            "A": 111111,
-            "B": 777777,
-        },
-        "Category2": {
-            "A": 333333,
-            "B": 999999,
-        },
-        "Category3": {
-            "A": 555555,
-            "B": 101011,
-        },
-    },
-    "Y": {
-        "Category1": {
-            "A": 222222,
-            "B": 888888,
-        },
-        "Category2": {
-            "A": 444444,
-            "B": 101010,
-        },
-        "Category3": {
-            "A": 666666,
-            "B": 101012,
-        },
-    },
-}
+MIT License. Copyright (c) 2020–2025 Adi Eyal.

@@ -1,32 +1,21 @@
-from collections import defaultdict
+from __future__ import annotations
+
 from collections.abc import Mapping
-from typing import Mapping, List, Iterable, Dict, Optional
 
-def flatten_dict(d:Mapping) -> list:
+# Minimum array length for nesting (key + value)
+MIN_ARRAY_LENGTH = 2
+
+
+def flatten_dict(d: Mapping) -> list[list]:
     """
-    Flatten a dictionary into an array of arrays e.g:
+    Flatten a dictionary into an array of arrays.
 
-    {
-        a: {
-            x: 2,
-            y: 3
-        },
-        b: {
-            x: 4,
-            y: 5
-        }
-    }
+    Example:
+        {a: {x: 2, y: 3}, b: {x: 4, y: 5}}
+        becomes
+        [[a, x, 2], [a, y, 3], [b, x, 4], [b, y, 5]]
 
-    becomes
-    [
-        [a, x, 2],
-        [a, y, 3],
-        [b, x, 4],
-        [b, y, 5],
-    ]
-
-    used as a component of the pivot function
-    
+    Used as a component of the pivot function.
     """
     if not isinstance(d, Mapping):
         return [[d]]
@@ -38,125 +27,82 @@ def flatten_dict(d:Mapping) -> list:
 
     return arr
 
-def rearrange(in_arrs: List[List], order: List[int]) -> List[List]:
+
+def rearrange(in_arrs: list[list], order: list[int]) -> list[list]:
     """
-    rearrange elements in a given list of arrays. The last element always remains in place
+    Rearrange elements in a given list of arrays by order indices.
+    The last element (value) always remains in place.
 
-    e.g.
-    d =[
-        [a, x, 2],
-        [a, y, 3],
-        [b, x, 4],
-        [b, y, 5],
-    ]
+    Args:
+        in_arrs: List of arrays to rearrange
+        order: List of indices specifying new order of keys
 
-    rearrange(d, [1, 0])
+    Returns:
+        Rearranged arrays
 
-    d =[
-        [x, a, 2],
-        [y, a, 3],
-        [x, b, 4],
-        [y, b, 5],
-    ]
+    Raises:
+        IndexError: If any index in order is out of range for the row
 
-    used as a componenbt of the pivot function
+    Example:
+        rearrange([[a, x, 2], [a, y, 3]], [1, 0])
+        becomes [[x, a, 2], [y, a, 3]]
     """
-    out_arrs = []
+    out = []
     for arr in in_arrs:
-        out_arrs += [[arr[idx] for idx in order] + [arr[-1]]]
+        # Validate indices against row width (excluding the last element which is the value)
+        max_key_index = len(arr) - 2  # -1 for last element, -1 for 0-based indexing
+        for i in order:
+            if i < 0 or i > max_key_index:
+                raise IndexError(
+                    f"order index {i} out of range for row with {max_key_index + 1} keys"
+                )
 
-    return out_arrs
+        out.append([arr[i] for i in order] + [arr[-1]])
 
-def nest(arrays:list, root:Optional[Dict]=None) -> Dict:
+    return out
+
+
+def nest(arrays: list, root: dict | None = None) -> dict:
     """
-    Unflatten a dictionary. Similar to qsdict but is simpler and works on arrays
+    Unflatten a dictionary from arrays. Similar to qsdict but simpler.
+
+    Args:
+        arrays: List of arrays where each array represents a path + value
+        root: Optional existing dict to merge into
+
+    Returns:
+        Nested dictionary
     """
-    if len(arrays) == 0:
+    if not arrays:
         return {}
 
-
-    d = root or defaultdict(dict)
+    d = root or {}
     for arr in arrays:
-        if len(arr) >= 2:
+        if len(arr) >= MIN_ARRAY_LENGTH:
             head, *tail = arr
             if len(tail) == 1:
                 d[head] = tail[0]
-            elif len(tail) > 1:
-                d[head] = nest([tail], d[head])
+            else:
+                d[head] = nest([tail], d.get(head, {}))
     return d
-        
-def pivot(d: Dict, order: List[int]) -> Dict:
+
+
+def pivot(d: dict, order: list[int]) -> dict:
     """
-    Pivots an array by a list of keys
+    Pivot a nested dictionary by rearranging the key levels according to order.
 
-    d = {
-        "A": {
-            "Category1": {
-                "X": 111111,
-                "Y": 222222,
-            },
-            "Category2": {
-                "X": 333333,
-                "Y": 444444,
-            },
-            "Category3": {
-                "X": 555555,
-                "Y": 666666,
-            }
-        },
-        "B": {
-            "Category1": {
-                "X": 777777,
-                "Y": 888888,
-            },
-            "Category2": {
-                "X": 999999,
-                "Y": 101010,
-            },
-            "Category3": {
-                "X": 101011,
-                "Y": 101012,
-            }
-        },
-    }
+    Args:
+        d: Input nested dictionary
+        order: List of indices specifying the new order of key levels
 
-    pivot(d, [2, 1, 0]) 
+    Returns:
+        Pivoted dictionary with keys rearranged
 
-    becomes:
-    
-    d = {
-    "X": {
-        "Category1": {
-            "A": 111111,
-            "B": 777777,
-        },
-        "Category2": {
-            "A": 333333,
-            "B": 999999,
-        },
-        "Category3": {
-            "A": 555555,
-            "B": 101011,
-        },
-    },
-    "Y": {
-        "Category1": {
-            "A": 222222,
-            "B": 888888,
-        },
-        "Category2": {
-            "A": 444444,
-            "B": 101010,
-        },
-        "Category3": {
-            "A": 666666,
-            "B": 101012,
-        },
-    },
-}
+    Example:
+        d = {"A": {"X": 1, "Y": 2}, "B": {"X": 3, "Y": 4}}
+        pivot(d, [1, 0]) -> {"X": {"A": 1, "B": 3}, "Y": {"A": 2, "B": 4}}
     """
     flattened = flatten_dict(d)
     rearranged = rearrange(flattened, order)
     nested = nest(rearranged)
-
     return nested

@@ -1,56 +1,85 @@
-from collections import OrderedDict
-from typing import Mapping, Iterable, Dict 
+from collections.abc import Iterable, Mapping
+from typing import Union
 
-def qsdict(qs: Iterable[Mapping], *args) -> Dict:
+# Minimum number of arguments required (excluding first parameter)
+MIN_ARGS = 2
+
+
+def _extract_value(q, key, strict: bool = False):
+    """Extract value from row q using selector key."""
+    if callable(key):
+        return key(q)
+    elif isinstance(key, int) and isinstance(q, Mapping) and key in q:
+        return q[key]
+    elif isinstance(key, str) and hasattr(q, key):
+        return getattr(q, key)
+    elif isinstance(q, Mapping) and key in q:
+        return q[key]
+    else:
+        if strict:
+            if isinstance(q, Mapping):
+                raise KeyError(f"Missing key {key!r}")
+            else:
+                raise AttributeError(f"Missing attribute {key!r}")
+        return None
+
+
+def _set_leaf_value(current_dict, q, args, extract_fn):
+    """Set the leaf value in the nested structure."""
+    if isinstance(args[-1], tuple):
+        # Multiple leaf values as a list
+        current_dict[extract_fn(q, args[-2])] = [extract_fn(q, el) for el in args[-1]]
+    else:
+        # Single leaf value
+        current_dict[extract_fn(q, args[-2])] = extract_fn(q, args[-1])
+
+
+def qsdict(qs: Iterable[Union[Mapping, object]], *args, strict: bool = False) -> dict:
     """
-    Convert a query string to a nested dict
-    :param qs: The query string from which the array will be created. qs can also be an object and args are all attributes on that object.
-    :param args: A list of fields which will be nested one inside the other in the dict. The last arg will be the value in the innermost dict. If an arg is callable then it will be executed with q as a parameter. If the last parameter is a tuple then all the values inside that tuple will be added as leaves.
-    :return:  A nested dict
+    Build a nested dict from rows (dicts or objects) by a sequence of selectors.
 
-    e.g.
-    qs = Queryset([{fa:1, fb:2, fc:3}, {fa:3, fb:4, fc:5}]),
-    using fc as the value
+    Args:
+        qs: Iterable of mappings or objects to process
+        *args: Selectors - each can be:
+            - Key name (str/int) to access dict keys or object attributes
+            - Callable that takes a row and returns a key
+            - Tuple of selectors for the leaf values (last arg only)
+        strict: If True, raise KeyError/AttributeError for missing selectors.
+                If False (default), missing selectors yield None keys.
 
-    {
-        1 : {
-            2 : 3
-        },
-        3 : {
-            4 : 5
-        }
-    }
+    Returns:
+        Nested dict where each level corresponds to a selector
+
+    Examples:
+        >>> data = [{"cat": "A", "val": 1}, {"cat": "B", "val": 2}]
+        >>> qsdict(data, "cat", "val")
+        {'A': 1, 'B': 2}
+
+        >>> qsdict(data, lambda x: x["cat"].lower(), "val")
+        {'a': 1, 'b': 2}
     """
-
-    if len(args) < 2:
+    if len(args) < MIN_ARGS:
         raise ValueError("Need at least two fields to nest dicts")
 
-    def v(q, key):
-        if callable(key):
-            return key(q)
-        elif type(key) == int and key in q:
-            return q[key]
-        elif hasattr(q, key):
-            return getattr(q, key)
-        elif key in q:
-            return q[key]
-        else:
-            return None
+    # Create extraction function with strict mode baked in
+    def extract_fn(q, key):
+        return _extract_value(q, key, strict)
 
-    d: Dict = {}
+    # Use plain dict everywhere (Python 3.9+ has insertion-order guarantees)
+    root: dict = {}
     for q in qs:
-        nested_dicts = [d]
+        nested_dicts = [root]
+
+        # Build nested structure up to second-to-last level
         for key in args[:-2]:
             current_dict = nested_dicts[-1]
-            value = v(q, key)
-            if not value in current_dict:
-                current_dict[value] = OrderedDict()
+            value = extract_fn(q, key)
+            if value not in current_dict:
+                current_dict[value] = {}
             nested_dicts.append(current_dict[value])
+
+        # Set leaf value at the deepest level
         current_dict = nested_dicts[-1]
-        if isinstance(args[-1], tuple):
-            current_dict[v(q, args[-2])] = [v(q, el) for el in args[-1]]
-        else:
-            current_dict[v(q, args[-2])] = v(q, args[-1])
+        _set_leaf_value(current_dict, q, args, extract_fn)
 
-    return d
-
+    return root
